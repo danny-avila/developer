@@ -1,5 +1,6 @@
 import os
 import modal
+import time
 import ast
 from utils import clean_dir
 from constants import DEFAULT_DIR, DEFAULT_MODEL, DEFAULT_MAX_TOKENS
@@ -165,11 +166,10 @@ def main(prompt, directory=DEFAULT_DIR, model=DEFAULT_MODEL, file=None):
             write_file("shared_dependencies.md", shared_dependencies, directory)
             
             # Iterate over generated files and write them to the specified directory
-            for filename, filecode in generate_file.map(
-                list_actual, order_outputs=False, kwargs=dict(model=model, filepaths_string=filepaths_string, shared_dependencies=shared_dependencies, prompt=prompt)
-            ):
-                write_file(filename, filecode, directory)
-
+            for actual in list_actual:
+              filename, filecode = generate_file(actual, filepaths_string=filepaths_string, shared_dependencies=shared_dependencies, prompt=prompt)
+              write_file(filename, filecode, directory)
+              time.sleep(30)  # wait for 30 seconds
 
     except ValueError:
         print("Failed to parse result")
